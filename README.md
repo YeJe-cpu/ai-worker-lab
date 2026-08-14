@@ -1,3 +1,5 @@
+<p align="right"><strong>English</strong> · <a href="README.zh.md">中文</a></p>
+
 # Worker Lab
 
 **A hand-drawn "AI worker" avatar generator — written in pure JavaScript. No AI image models. Every face is code.**
