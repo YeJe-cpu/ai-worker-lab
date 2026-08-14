@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Worker Lab</title>
-<meta name="description" content="Procedural hand-drawn 'AI worker' avatar generator — pure JavaScript, no AI image models. Inspired by @mannay's 'draw faces with javascript'.">
+<title>inkheads</title>
+<meta name="description" content="inkheads — seed to a unique hand-drawn doodle avatar. Pure JavaScript, no AI image models. Inspired by @mannay's 'draw faces with javascript'.">
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTIiIGZpbGw9IiNlOWU0ZDgiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjMwIiByPSIxOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjQxZjFhIiBzdHJva2Utd2lkdGg9IjMuMiIvPjxjaXJjbGUgY3g9IjI1IiBjeT0iMjciIHI9IjIuNiIgZmlsbD0iIzI0MWYxYSIvPjxjaXJjbGUgY3g9IjM5IiBjeT0iMjciIHI9IjIuNiIgZmlsbD0iIzI0MWYxYSIvPjxwYXRoIGQ9Ik0yNCAzOSBoMTYiIHN0cm9rZT0iIzI0MWYxYSIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNNDYgMTQgcTQgLTYgOCAwIiBzdHJva2U9IiNjOThhNWUiIHN0cm9rZS13aWR0aD0iMi40IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=">
 <style>
   :root{
@@ -106,7 +106,7 @@
 
 <div class="wrap">
   <aside class="rail">
-    <h1 class="brand">Worker <b>·</b> Lab</h1>
+    <h1 class="brand">ink<b>·</b>heads</h1>
     <p class="sub" id="meta">seed — · —ms</p>
 
     <div class="seedbox">
@@ -240,7 +240,7 @@ function Renderer(ctx, S, cx, cy, yaw, pitch, jseed){
   function ink(raw, o){
     o=o||{};
     const width=(o.width==null?2.6:o.width), color=o.color||'#241f1a',
-          jitter=(o.jitter==null?1.05:o.jitter), passes=o.passes||2,
+          jitter=(o.jitter==null?1.2:o.jitter), passes=o.passes||2,
           closed=!!o.closed, taper=!!o.taper, alpha=(o.alpha==null?1:o.alpha);
     const dense = smooth(raw, closed, o.samples||10);
     const sp = dense.map(p=>proj(p[0],p[1],p[2]));
@@ -251,17 +251,18 @@ function Renderer(ctx, S, cx, cy, yaw, pitch, jseed){
       return [p[0]+n*jitter, p[1]+m*jitter];
     });
     for(let pass=0;pass<passes;pass++){
-      const ox=pass?(wob()*2-1)*1.4:0, oy=pass?(wob()*2-1)*1.4:0;
+      const ox=pass?(wob()*2-1)*1.6:0, oy=pass?(wob()*2-1)*1.6:0;
       ctx.strokeStyle=color; ctx.lineCap='round'; ctx.lineJoin='round';
       for(let i=0;i<W.length-1;i++){
         const t=i/(W.length-1);
         const pres = taper ? (Math.sin(Math.PI*Math.max(0,Math.min(1,t)))*0.8+0.35)
                            : (0.7+0.5*Math.sin(i*0.7+ph)+0.12*Math.sin(i*1.9+ph*2));
-        ctx.globalAlpha = alpha*(pass?0.5:0.92);
-        ctx.lineWidth = Math.max(0.5,width*pres);
+        const jx=(wob()*2-1)*0.85, jy=(wob()*2-1)*0.85;   // rough dry-brush scatter
+        ctx.globalAlpha = alpha*(pass?0.42:0.9);
+        ctx.lineWidth = Math.max(0.5,width*pres*(0.8+wob()*0.55));   // breathing, uneven weight
         ctx.beginPath();
-        ctx.moveTo(W[i][0]+ox, W[i][1]+oy);
-        ctx.lineTo(W[i+1][0]+ox, W[i+1][1]+oy);
+        ctx.moveTo(W[i][0]+ox+jx, W[i][1]+oy+jy);
+        ctx.lineTo(W[i+1][0]+ox+(wob()*2-1)*0.85, W[i+1][1]+oy+(wob()*2-1)*0.85);
         ctx.stroke();
       }
     }
@@ -358,10 +359,15 @@ function inkColor(T){
   return c;
 }
 function headPath(T){
-  const rx=T._hrx, ry=T._hry, n=26, rr=makeRng(T._seed^0x9e37);
+  const rx=T._hrx, ry=T._hry, n=30, rr=makeRng(T._seed^0x9e37);
+  // low-frequency lobes make the skull lopsided & organic (not a clean egg)
+  const ph1=rr()*6.283, ph2=rr()*6.283, ph3=rr()*6.283;
+  const a2=0.055+rr()*0.075, a3=0.03+rr()*0.055, tilt=(rr()*2-1)*0.06;
   const p=[];
-  for(let i=0;i<n;i++){ const a=i/n*Math.PI*2, wob=1+(rr()*2-1)*0.045;
-    p.push([Math.cos(a)*rx*wob, Math.sin(a)*ry*wob, 0]); }
+  for(let i=0;i<n;i++){ const a=i/n*Math.PI*2;
+    const rw = 1 + a2*Math.sin(a*2+ph1) + a3*Math.sin(a*3+ph2) + (rr()*2-1)*0.028;
+    const rh = 1 + a3*Math.cos(a*2+ph3);
+    p.push([Math.cos(a)*rx*rw + tilt*Math.sin(a), Math.sin(a)*ry*rh, 0]); }
   return p;
 }
 
@@ -385,7 +391,7 @@ function drawFace(ctx, W, H, T, opt){
   const earY=0.12;
   [[-1],[1]].forEach(([sgn])=>{ const ex=sgn*(T._hrx*0.98);
     r.ink([[ex,earY-0.14,-0.16],[ex+sgn*0.14,earY,-0.18],[ex,earY+0.16,-0.16]],{width:2.4,color:INK,jitter:0.9,passes:2}); });
-  r.ink(headPath(T),{width:3.1,color:INK,jitter:1.15,passes:2,closed:true,samples:12});
+  r.ink(headPath(T),{width:3.5,color:INK,jitter:1.5,passes:3,closed:true,samples:12});
 
   if(T.status.name!=='baldspot') drawHair(r,T,INK);
   drawStatus(r,T,INK);                          // head-top meme
@@ -461,21 +467,46 @@ function drawMouth(r,T,INK,aS){
 
 function drawHair(r,T,INK){
   const k=T.hair.name; if(k==='bald') return;
+  // hair reads bold: solid dark cap + texture. mono -> ink black; full -> hair colour but never washed out.
   const hc=(T.colour.name==='full')?T._hairc:INK, rx=T._hrx, ry=T._hry, crown=-ry*0.86;
-  if(k==='short'){
-    r.ink([[-rx*0.9,crown+0.15,0.05],[-rx*0.5,crown-0.04,0.05],[0,crown-0.08,0.05],[rx*0.5,crown-0.03,0.05],[rx*0.9,crown+0.16,0.05]],{width:3,color:hc,passes:2,jitter:1.1});
-    if(T.colour.name==='full') r.patch([[-rx*0.92,crown+0.16,0],[0,crown-0.12,0],[rx*0.92,crown+0.16,0],[rx*0.7,crown+0.02,0],[0,crown+0.06,0],[-rx*0.7,crown+0.02,0]],hc,{alpha:0.7});
-  } else if(k==='scribble'){ r.scribbleFill(0,crown+0.12,rx*0.86,ry*0.28,0.02,hc,'scribble',20);
-    r.ink([[-rx*0.9,crown+0.28,0.03],[0,crown-0.05,0.03],[rx*0.9,crown+0.28,0.03]],{width:2.8,color:hc,passes:2});
-  } else if(k==='hatch'){ r.scribbleFill(0,crown+0.12,rx*0.84,ry*0.26,0.02,hc,'hatch',16);
-    r.ink([[-rx*0.9,crown+0.26,0.03],[0,crown-0.06,0.03],[rx*0.9,crown+0.26,0.03]],{width:2.8,color:hc,passes:2});
-  } else if(k==='spiky'){ const n=11; for(let i=0;i<=n;i++){ const t=i/n, ang=Math.PI*(1+t), bx=Math.cos(ang)*rx*0.92, by=-Math.abs(Math.sin(ang))*ry*0.9+0.02;
-    r.ink([[bx,by,0.04],[bx+(r.wob()*2-1)*0.08,by-0.18-r.wob()*0.12,0.04]],{width:2.2,color:hc,passes:1,jitter:0.7}); }
-  } else if(k==='curly'){ const n=14; for(let i=0;i<n;i++){ const a=Math.PI*(1.05+0.9*i/n), bx=Math.cos(a)*rx*0.9, by=Math.sin(a)*ry*0.9;
-    r.ink(circle(bx,by-0.02,0.08+r.wob()*0.03,0.04,8),{width:2,color:hc,passes:1,jitter:0.5,closed:true}); }
-  } else if(k==='side'){ r.ink([[-rx*0.92,crown+0.5,0.04],[-rx*0.4,crown-0.05,0.04],[rx*0.5,crown+0.02,0.04],[rx*0.6,crown+0.3,0.04]],{width:3,color:hc,passes:2});
-  } else if(k==='mop'){ r.scribbleFill(0,crown+0.2,rx*0.94,ry*0.34,0.02,hc,'scribble',26);
-    r.ink([[-rx*0.95,crown+0.45,0.03],[-rx*0.5,crown-0.08,0.03],[0,crown-0.12,0.03],[rx*0.5,crown-0.06,0.03],[rx*0.95,crown+0.45,0.03]],{width:3,color:hc,passes:2,jitter:1.2}); }
+
+  // solid dark cap: upper arc along the skull, wavy fringe at the bottom
+  function cap(spread, fringeY, jag, n){
+    n=n||16; const pts=[];
+    for(let i=0;i<=n;i++){ const a=Math.PI+Math.PI*(i/n);          // top arc left->right
+      pts.push([Math.cos(a)*rx*spread, Math.sin(a)*ry*spread, 0.02]); }
+    for(let i=n;i>=0;i--){ const t=i/n, x=(-1+2*t)*rx*spread;
+      const fy=fringeY - Math.sin(t*Math.PI)*0.05 + (r.wob()*2-1)*jag; // wavy fringe
+      pts.push([x, fy, 0.02]); }
+    r.patch(pts, hc, {alpha:0.96, dx:(r.wob()*2-1)*2.5, dy:(r.wob()*2-1)*2.5}); // slight off-register
+    r.ink(pts, {width:2.2, color:hc, passes:2, closed:true, jitter:1.1});
+    return pts;
+  }
+  // dense parallel hatch strokes over the cap (beanie / short-hair texture)
+  function hatchTop(spread, y0, y1, dens){
+    const n=dens||24;
+    for(let i=0;i<n;i++){ const x=(-1+2*i/n)*rx*spread*0.96;
+      r.ink([[x,y0+(r.wob()*2-1)*0.03,0.03],[x+(r.wob()*2-1)*0.03,y1+(r.wob()*2-1)*0.04,0.03]],
+        {width:1.5,color:hc,passes:1,jitter:0.4}); }
+  }
+  // dense curl marks (curly / mop)
+  function curls(spread, y0, y1, dens){
+    const n=dens||30;
+    for(let i=0;i<n;i++){ const cx0=(-1+2*(i%10)/10 + (r.wob()-0.5)*0.22)*rx*spread*0.9;
+      const cy0=y0+(y1-y0)*(Math.floor(i/10)/Math.max(1,Math.floor(n/10)))+(r.wob()-0.5)*0.06, rr=0.045+r.wob()*0.03;
+      r.ink(arc(cx0,cy0,rr,0,Math.PI*1.7,0.03,6),{width:1.7,color:hc,passes:1,jitter:0.5}); }
+  }
+
+  if(k==='short'){ cap(0.99, crown+0.42, 0.035); hatchTop(0.9, crown+0.04, crown+0.34, 22);
+  } else if(k==='side'){ cap(1.0, crown+0.5, 0.045); hatchTop(0.95, crown+0.04, crown+0.42, 24);
+  } else if(k==='mop'){ cap(1.04, crown+0.58, 0.06); curls(1.0, crown+0.08, crown+0.5, 36);
+  } else if(k==='scribble'){ cap(0.98, crown+0.4, 0.05, 14); curls(0.9, crown+0.04, crown+0.34, 26);
+  } else if(k==='curly'){ curls(0.98, crown, crown+0.5, 46);
+  } else if(k==='hatch'){ cap(0.99, crown+0.36, 0.03); hatchTop(0.92, crown-0.02, crown+0.3, 30);
+  } else if(k==='spiky'){ cap(0.96, crown+0.2, 0.03, 12);
+    const n=13; for(let i=0;i<=n;i++){ const t=i/n, ang=Math.PI*(1+t), bx=Math.cos(ang)*rx*0.9, by=-Math.abs(Math.sin(ang))*ry*0.92+0.02;
+      r.ink([[bx,by,0.05],[bx+(r.wob()*2-1)*0.08,by-0.2-r.wob()*0.13,0.05]],{width:2.4,color:hc,passes:2,jitter:0.6}); }
+  }
 }
 
 function drawEyewear(r,T,INK,lE,rE,R){
@@ -755,9 +786,26 @@ $('#exportFace').onclick=()=>{
   const c=document.createElement('canvas'); c.width=W; c.height=H;
   const x=c.getContext('2d');
   paper(x,W,H); drawFace(x,W,H,currentTraits(),{yaw:state.yaw,pitch:state.pitch,pose:true}); grain(x,W,H);
-  saveCanvas(c, `worker_${state.seed}.png`);
+  saveCanvas(c, `inkhead_${state.seed}.png`);
 };
 $('#exportPlate').onclick=()=>{ renderPlate(); saveCanvas(plateCv, `standup_${plateSeedBase}.png`); };
+
+/* ---- tiny embedding API ----
+   Drop a stable, unique doodle avatar into any <canvas> from a seed.
+   e.g.  inkheads.render(cv, inkheads.hashStr(user.email))  ---- */
+window.inkheads = {
+  render(canvas, seed, opt){
+    opt=opt||{}; const x=canvas.getContext('2d'), W=canvas.width, H=canvas.height;
+    const s = (typeof seed==='string') ? hashStr(seed) : (seed>>>0);
+    const T=buildFace(s);
+    paper(x,W,H);
+    drawFace(x,W,H,T,{yaw:(opt.yaw!=null?opt.yaw:T._poseYaw*0.5),
+                      pitch:(opt.pitch!=null?opt.pitch:T._posePitch*0.5), pose:false});
+    grain(x,W,H);
+    return T;                       // the trait object, if you want the rarity/labels
+  },
+  buildFace, hashStr
+};
 
 buildControls();
 render();

@@ -1,38 +1,54 @@
 <p align="right"><a href="README.md">English</a> · <strong>中文</strong></p>
 
-# Worker Lab
+# inkheads
 
-**一个手绘风「AI 打工人」头像生成器 —— 纯 JavaScript 写的，没有任何 AI 生图模型。每一张脸都是代码画出来的。**
+**一颗种子 → 一张唯一的手绘涂鸦头像。纯 JavaScript —— 没有任何 AI 生图模型，每张脸都是代码画的。**
 
-睡眠不足的工程师、冒着烟的 burnout、只剩 1% 电量的脑子、神经光环、"0 tokens 了"—— 一屋子（据说）在建设未来的打工人，每一张都由一颗随机种子、一行行代码画成。
+<p align="center">
+  <img src="assets/face_1.png" width="24%" alt="戴耳机墨镜的涂鸦头像">
+  <img src="assets/face_2.png" width="24%" alt="锅盖头、冒烟、挂工牌的涂鸦头像">
+  <img src="assets/face_3.png" width="24%" alt="卷发、头顶转圈的涂鸦头像">
+  <img src="assets/face_4.png" width="24%" alt="戴眼镜、竖发的涂鸦头像">
+</p>
 
-![36 张程序化生成的 AI 打工人头像](assets/standup_1000.png)
+<p align="center"><em>输入一个数字，得到一个人。同一个数字，永远是同一个人。全部由约 700 行 JavaScript 画成。</em></p>
 
-<p align="center"><em>一颗种子 → 36 个同事，无一雷同。全部由约 700 行 JavaScript 画成。</em></p>
-
-<p align="center"><strong>▶︎ 在线试玩：<a href="https://yeje-cpu.github.io/ai-worker-lab/">yeje-cpu.github.io/ai-worker-lab</a></strong></p>
+<p align="center"><strong>▶︎ 在线试玩：<a href="https://yeje-cpu.github.io/inkheads/">yeje-cpu.github.io/inkheads</a></strong></p>
 
 ---
 
-## 为什么会有这个
+## 这是什么
 
-[@mannay](https://x.com/mannay) 发了一个很妙的点子 —— *"you can just draw faces with javascript"*（你完全可以用 JavaScript 画脸）：一个程序化的涂鸦脸生成器，每个器官都是手写的几何图形，再做旧成像是手绘的。
+一个把数字变成手绘脸的小生成器。每个器官 —— 歪扭的头骨、实心墨的头发、疲惫的眼 —— 都是代码画的几何图形，再做旧成像是钢笔手绘、而不是绘图仪印出来的。
 
-这个点子太好玩，没法划走就算了。于是这是一次**对该技术的独立 clean-room 复现**，并换上了一个我没忍住的主题：**AI 打工人**。同一套核心把戏，换一批角色 —— 疲惫的眼神取代中性的眼、降噪耳机和工牌取代光头，再加一块把你从 `intern` 排到 `10x eng` 的稀有度面板。
+它起点是 [@mannay](https://x.com/mannay) 那个很妙的 *"you can just draw faces with javascript"*（你完全可以用 JavaScript 画脸）涂鸦。**inkheads** 是对这套技术的独立 clean-room 复现，换成了 AI 时代倦怠码农的皮：冒烟的 burnout、1% 电量的脑子、"0 tokens 了"、降噪耳机、工牌，还有一块把每个"新员工"从 `intern` 排到 `10x eng` 的稀有度面板。
 
 它**不是** AI 生图工具。没有模型、没有 API 调用、没有 `prompt`。只有一个带种子的随机数生成器、一点三角函数，和一支抖抖的墨水笔在假装是一只会手抖的人手。
 
+## 拿它当头像用
+
+因为一张脸完全由种子决定，inkheads 也是一个**零依赖的头像 / identicon 生成器** —— 干的就是 GitHub 默认头像、Gravatar、DiceBear 那件事，只不过是手绘的：
+
+```js
+// 任意字符串（用户名 / 邮箱 / ID）都会被哈希成一张稳定、唯一的脸
+inkheads.render(canvas, user.email);
+```
+
+每个用户唯一、每次访问都一样、**全在前端跑** —— 不用服务器、不涉真人照片、不用 AI、没有隐私负担。适合做默认头像、设计稿里的占位脸，或一套带稀有度的 PFP 藏品（稀有度系统天生就有）。
+
+……说实话，它主要还是坐那儿一直点 **random** 就很好玩。
+
 ## 你能得到什么
 
-🎲 **确定性** —— 每个头像就是一个数字。同一颗种子，永远是同一个打工人。输入 `404`、分享 `404`，你朋友拿到的是一模一样的那个倦怠灵魂。
+🎲 **确定性** —— 每个头像就是一个数字。输入 `404`、分享 `404`，你朋友拿到的是一模一样的那个灵魂。
 
 🧩 **锁定任意特征** —— 10 个下拉（头骨、眼、眉、鼻、嘴、发、状态、装备、眼镜、梗）。留 `(auto)` 随机滚，或钉死某一项来"捏脸"。
 
 🔄 **它会转头** —— `yaw` / `pitch` 滑块转动一个粗糙的 3D 头骨；五官钉在上面跟着一起滑。故意做得很憨 —— 这正是它的味道。
 
-🏅 **稀有度，游戏化** —— 每个特征都带掉率。稀有件堆得越多，你的 `burnout` 分越高，从 `intern` → `junior` → `senior` → `staff` → `10x eng`。
+🏅 **稀有度，游戏化** —— 每个特征都带掉率。稀有件堆得越多，分越高，从 `intern` → `junior` → `senior` → `staff` → `10x eng`。
 
-🖼️ **两种视图** —— **Desk** 看单个打工人的高清细节，**Standup** 看 36 连的整版图。在整版图里点任意一张脸，就能在 Desk 打开它。
+🖼️ **两种视图** —— **Desk** 看单张脸的高清细节，**Standup** 看 36 连的整版图。在整版图里点任意一张脸，就能在 Desk 打开它。
 
 ⤓ **导出 PNG** —— 单张 4× 高清，或整版 36 连图。普通浏览器下载，哪都能用。
 
@@ -56,7 +72,7 @@
 
 1. **零件库** —— 每个特征是一个小的画法函数，返回局部 2D/3D 坐标点（眼睛 = 两条弧 + 一个实心瞳孔；鼻子 = 一条长曲线画到鼻尖）。每个特征多个变体。
 2. **组装规则** —— 一个带种子的 [mulberry32](https://en.wikipedia.org/wiki/Xorshift) 随机数生成器决定选哪个变体、摆在哪、什么颜色。这是"DNA → 身体"那一步。
-3. **手绘墨线引擎** —— 卖相全靠这层。Catmull-Rom 平滑、逐点正弦抖动、沿线呼吸变化的笔宽、带故意错位的双次叠墨，再加纸纹和颗粒。这一层与主题无关；换掉第 1–2 层，同一套风格能画任何东西。
+3. **手绘墨线引擎** —— 卖相全靠这层。Catmull-Rom 平滑、逐点抖动、不均匀"呼吸"的笔宽、粗糙的多次干笔刷边缘、带排线/卷发纹理的实心墨发填充，再加纸纹颗粒。这一层与主题无关；换掉第 1–2 层，同一套风格能画任何东西。
 
 转头故意做得很省：底下垫一个粗糙的 3D 头，五官钉在不同深度上（鼻子探出最多，所以摆动最明显），拖滑块时全部重新投影。
 
@@ -73,13 +89,13 @@ python3 -m http.server 8144
 # → http://localhost:8144
 ```
 
-把它当静态站点部署到 Vercel / Netlify / GitHub Pages / Cloudflare Pages 都行 —— 没有任何要构建的东西。
+把它当静态站点部署到 GitHub Pages / Vercel / Netlify / Cloudflare Pages 都行 —— 没有任何要构建的东西。
 
 ## 致谢
 
 这一切的种子是 **[@mannay](https://x.com/mannay)** 和他 *"you can just draw faces with javascript"* / *"everything is code"* 的涂鸦。参数化零件 + 假手绘墨线这套路子是他的；去看看他的作品，很妙。
 
-本仓库是对那套**技术**的**独立 clean-room 复现**（未复制任何源码 —— 他的生成器并未开源），换成了 AI 打工人主题，并在上面加了新的零件库、稀有度系统、转头和 PNG 导出。
+本仓库是对那套**技术**的**独立 clean-room 复现**（未复制任何源码 —— 他的生成器并未开源），换成了 AI 时代码农主题，并在上面加了新的零件库、稀有度系统、转头和 PNG 导出。
 
 ## 许可
 
