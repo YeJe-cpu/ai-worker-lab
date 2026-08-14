@@ -8,6 +8,8 @@ Sleep-deprived engineers, burnout smoke, 1%-battery brains, neural halos, "0 tok
 
 <p align="center"><em>One seed → 36 coworkers. No two alike. All drawn by ~700 lines of JavaScript.</em></p>
 
+<p align="center"><strong>▶︎ Play with it live: <a href="https://ai-worker-lab.vercel.app">ai-worker-lab.vercel.app</a></strong></p>
+
 ---
 
 ## Why this exists
